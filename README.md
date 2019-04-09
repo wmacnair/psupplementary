@@ -1,6 +1,6 @@
 # psupplementary
 
-Hello! Hopefully you're here because you're interested in the R package `psupertime`. `psupertime` is an R package which uses single cell RNAseq data, where the cells have labels following a known sequence (e.g. a time series), to identify a small number of genes which place cells in that known order. It can be used for discovery of relevant genes, for exploration of unlabelled data, and assessment of one dataset with respect to the labels known for another dataset.
+Hello! Hopefully you're here because you're interested in the R package `psupertime`. `psupertime` is an R package which uses single cell RNAseq data, where the cells have labels following a known sequence (e.g. a time series), to identify a small number of genes which place cells in that known order. It can be used for discovery of relevant genes, for exploration of unlabelled data, and assessment of one dataset with respect to the labels known for another dataset. You can find `psupertime` [here](https://github.com/wmacnair/psupertime).
 
 `psupplementary` is a package for replicating the analyses in the `psupertime` paper, and allowing users to play with `psupertime` themselves and see what it can do. The `psupertime` package has everything you need to do your own analysis; splitting the heavy data off into this supplementary package keeps the main package light.
 
