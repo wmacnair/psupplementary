@@ -16,14 +16,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-# library('psupertime')
-# library('psupplementary')
-# code_dir          = 'Z:/Documents/Code'
-code_dir          = '/Users/macnairw/Documents/Code/'
-psuper_dir        = file.path(code_dir, 'psupertime')
-devtools::load_all(psuper_dir)
-psupplement_dir   = file.path(code_dir, 'psupplementary')
-devtools::load_all(psupplement_dir)
+library('psupertime')
 ```
 
 # `psupplementary` overview
@@ -50,7 +43,8 @@ There are six scRNAseq datasets included in this package:
 Here we illustrate `psupertime` on a simple example, using the default parameters to analyse pancreas cells taken from donors of varying ages.
 
 ```{r}
-acinar_cells_plots()
+# NOT RUN
+# acinar_cells_plots()
 ```
 
 ## GO enrichment of genes relevant to acinar cells
@@ -58,7 +52,8 @@ acinar_cells_plots()
 We can also analyse which GO terms are enriched at various points of the sequence.
 
 ```{r}
-acinar_cells_go_term_analysis()
+# NOT RUN
+# acinar_cells_go_term_analysis()
 ```
 
 ## Exploratory data analysis of unlabelled data
@@ -66,5 +61,6 @@ acinar_cells_go_term_analysis()
 Here we illustrate how `psupertime` can be combined with dimensionality reduction and unsupervised clustering to explore user-selected sequences of clusters. Here, we use UMAP for the dimensionality reduction, and Seurat for the unsupervised clustering; users may choose their preferred combination.
 
 ```{r}
-unsupervised_clustering_of_colon_cells()
+# NOT RUN
+# unsupervised_clustering_of_colon_cells()
 ```
