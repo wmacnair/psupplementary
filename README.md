@@ -11,9 +11,14 @@ If you haven't already, you'll need to install `psupertime`, as follows:
 devtools::install_github('wmacnair/psupertime')
 ```
 
-Then install the supplementary package, run the following lines in R:
+Due to the large files, installing the supplementary package is slightly more complicated. You need to first clone the package
+```sh
+cd /path/to/packages
+git clone https://github.com/wmacnair/psupplementary.git
+```
+then run the following lines in R to install it:
 ```R
-devtools::install_github('wmacnair/psupplementary')
+devtools::install('path/to/packages/psupplementary')
 library('psupplementary')
 ```
 
