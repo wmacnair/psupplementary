@@ -1,5 +1,5 @@
 #' Dimensionality reduction plots and standard psupertime results for acinar cells
-#' (Fig 1C, Fig 1D, Fig 1D, Supp Fig 01, Supp Fig 02, Supp Fig 03)
+#' (Fig 1C, Fig 1D, Fig 1E, Supp Fig 01, Supp Fig 02, Supp Fig 03)
 #'
 #' @import data.table
 #' @import ggplot2
@@ -295,7 +295,9 @@ unsupervised_clustering_of_colon_cells <- function(output_dir='.', ext='png') {
 
 		# plot selected cluster ordering
 		message('plotting selected sequence over UMAP')
-		plot_selected_cluster_ordering(layout_dt, this_order, tag, output_dir, ext)
+		g 				= plot_selected_cluster_ordering(layout_dt, this_order)
+		plot_file 		= file.path(output_dir, sprintf('fig1F unsupervised cluster ordering %s.%s', tag, ext))
+		ggsave(plot_file, g, height=4, width=5)
 
 		# do go stuff
 		message('GO enrichment analysis of gene clusters')
@@ -343,7 +345,7 @@ do_seurat_clustering <- function(sce_hvg) {
 #' @import data.table
 #' @import ggplot2
 #' @internal
-plot_selected_cluster_ordering <- function(layout_dt, this_order, tag, output_dir, ext) {
+plot_selected_cluster_ordering <- function(layout_dt, this_order) {
 	palette 		= 'BrBG'
 
 	# get clusters to exclude
@@ -365,6 +367,5 @@ plot_selected_cluster_ordering <- function(layout_dt, this_order, tag, output_di
 		labs(
 			fill 		= 'Cluster'
 			)
-	plot_file 		= file.path(output_dir, sprintf('fig1F unsupervised cluster ordering %s.%s', tag, ext))
-	ggsave(plot_file, g, height=4, width=5)
+	return(g)
 }

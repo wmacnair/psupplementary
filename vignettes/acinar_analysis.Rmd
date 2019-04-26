@@ -1,0 +1,165 @@
+---
+title: "Analysis of acinar cells labelled with donor ages"
+author: "Will Macnair"
+date: "`r Sys.Date()`"
+output: 
+    BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Analysis of acinar cells labelled with donor ages}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>"
+)
+```
+
+This vignette reproduces the follow figures from the `psupertime` preprint:
+
+- Fig 1C, Fig 1D, Fig 1E, Supp Fig 01, Supp Fig 02, Supp Fig 03, Supp Fig 04, Supp Fig 05
+
+# Data and requirements
+
+This vignette illustrates the default `psupertime` analysis and plotting, by analysing data derived from aging acinar cells. The data is stored in `acinar_sce`, which consists of 411 acinar cells with sequential labels corresponding to age of donor in years (from [here](https://www.sciencedirect.com/science/article/pii/S009286741731053X), GSE81547).
+
+There are a couple of bits of additional analysis for which you need additional packages (and which will not run if you don't have them):
+
+- Dimensionality reduction plots to get a feel for how the data is distributed (requires `umap` to be installed).
+- GO enrichment of genes relevant to acinar cells (requires `topGO` to be installed).
+
+```{r warnings=FALSE}
+  # load packages
+  suppressPackageStartupMessages({
+    library('psupertime')
+    library('psupplementary')
+    })
+```
+
+# Obtaining data and doing dimensionality reduction
+
+Let's first get the relevant data, and restrict to just the highly variable genes.
+
+```{r}
+  # get data
+  message('loading acinar cell SCE object')
+  tag       = 'aging_acinar'
+  label_name    = 'Donor age\n(years)'
+  data(acinar_sce)
+  acinar_sce
+
+  # restrict to highly variable genes
+  message('identifying highly variable genes')
+  hvg_params    = list(hvg_cutoff=0.1, bio_cutoff=0.5, span=0.1)
+  sel_genes     = psupertime:::calc_hvg_genes(acinar_sce, hvg_params)
+  acinar_hvg    = acinar_sce[sel_genes, ]
+  acinar_hvg
+```
+
+Now we check how the labels are distributed over the data using a non-linear dimensionality reduction algorithm (this reproduces _Fig 1C_). This plot shows that although the individual donors explain a large proportion of the variation in the data (i.e. cells generally cluster with other cells from the same donor), donor _age_ accounts for only a small proportion of the variation.
+
+```{r, fig.wide=TRUE, fig.height=5, fig.width=6, fig.cap="UMAP dimensionality reduction"}
+  # check whether can use umap
+  if ( !requireNamespace("umap", quietly=TRUE) ) {
+    message('umap not installed; not doing clustering')
+    return()
+  }
+
+  library('umap')
+
+  # calc and plot umap
+  message('projecting using UMAP')
+  x               = t(SummarizedExperiment::assay(acinar_hvg, 'logcounts'))
+  wellKey_vector  = SingleCellExperiment::colData(acinar_hvg)$wellKey
+  label_vector    = factor(SingleCellExperiment::colData(acinar_hvg)[['donor_age']])
+  proj_umap       = calc_umap(x, wellKey_vector)
+  g               = plot_dim_reduction(label_vector, proj_umap$umap1, proj_umap$umap2, 
+    labels=c('umap1', 'umap2', 'Donor age (years)'))
+  (g)
+```
+
+# Running `psupertime`
+
+We now run `psupertime` using default parameters, and examine the genes that it identifies. We first specify the sequential labels to be used, in this case `donor_age`. 
+
+(Note that we use the sce `acinar_sce`, rather than the restricted `acinar_hvg`. This is because `psupertime` does the dimensionality reduction itself. Normally we wouldn't do the gene selection separately, but here we wanted to look at the UMAP projection.)
+
+```{r}
+  # run psupertime
+  message('running psupertime')
+  y_age       = acinar_sce$donor_age
+  psuper_obj  = psupertime(acinar_sce, y_age)
+```
+
+# Plotting `psupertime` results
+
+The plot below shows how the sequential labels are distributed over the identified pseudotime (_Fig 1D_). This allows us to check how easily `psupertime` was able to order the cells.
+
+```{r, fig.wide=TRUE, fig.height=4, fig.width=7, fig.cap="Sequential labels plotted over pseudotime values"}
+  # plot labels over learned psupertime
+  message('plotting labels over psupertime')
+  g         = plot_labels_over_psupertime(psuper_obj, label_name)
+  (g)
+```
+
+We can check the effect of different levels of regularization, $\lambda$, on classification performance and sparsity. The plot below shows training and test performance of `psupertime` used as a classifier, for the range of $\lambda$ values it was trained over (_Supp Fig 01_).
+
+```{r, fig.wide=TRUE, fig.height=8, fig.width=6, fig.cap="Diagnostic plot for checking that training worked well"}
+  # plot training diagnostics
+  message('plotting psupertime training diagnostics')
+  g         = plot_train_results(psuper_obj)
+  (g)
+```
+
+The next plot shows the profiles of genes identified by `psupertime`, plotted against the learned pseudotime values (_Supp Fig 02_).
+
+```{r, fig.wide=TRUE, fig.height=6, fig.width=9, fig.cap="Expression profiles of relevant genes over pseudotime"}
+  # plot identified genes against learned psupertime
+  message('plotting identified genes over psupertime')
+  g         = plot_identified_genes_over_psupertime(psuper_obj, label_name)
+  (g)
+  # NOT RUN: smaller plot replicating Fig 1E
+  # g         = plot_identified_genes_over_psupertime(psuper_obj, label_name, n_to_plot=5)
+```
+
+Each of these genes has a different coefficient, indicating how strongly they affect the pseudotime values. The plot below shows the coefficients for the top 20 genes, subject to minimum absolute coefficient value of 0.05 (_Supp Fig 03_). Positive coefficients correspond to genes positively correlated with the label sequence, and vice versa for negative coefficients.
+
+```{r, fig.wide=TRUE, fig.height=3, fig.width=6, fig.cap="Ordering coefficients of relevant genes"}
+  # plot coefficients for identified genes
+  message('plotting identified gene coefficients')
+  g         = plot_identified_gene_coefficients(psuper_obj)
+  (g)
+```
+
+# GO enrichment of genes relevant to acinar cells
+
+We can also analyse which GO terms are enriched at various points of the sequence. Calculating the GO terms can take a little while.
+
+```{r}
+  # check whether can use topGO
+  if ( !requireNamespace("topGO", quietly=TRUE) ) {
+    message('topGO not installed; not doing clustering')
+    return()
+  }
+  suppressPackageStartupMessages(library('topGO'))
+
+  # calculate go terms
+  go_list     = psupertime_go_analysis(psuper_obj, org_mapping='org.Hs.eg.db')
+
+  # plot gene cluster profiles
+  g_profiles  = plot_profiles_of_gene_clusters(go_list, label_name='Donor age\n(years)')
+  # plot go terms
+  g_go        = plot_go_results(go_list)
+```
+
+Once we've done that, we can plot the mean profiles of the clustered genes against the pseudotime values. This tells us whether these genes are up, down or otherwise regulated over the sequence of labels.
+```{r, fig.wide=TRUE, fig.height=8, fig.width=6, fig.cap="Mean profiles of gene clusters over pseudotime (_Supp Fig 04_)"}
+  (g_profiles)
+```
+
+We can then show the GO terms enriched in each gene cluster relative to the others.
+```{r, fig.wide=TRUE, fig.height=8, fig.width=6, fig.cap="GO terms enriched in each gene cluster relative to remaining clusters (_Supp Fig 05_)"}
+  (g_go)
+```

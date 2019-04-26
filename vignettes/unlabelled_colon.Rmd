@@ -1,0 +1,238 @@
+---
+title: "Exploratory data analysis of unlabelled colon data"
+author: "Will Macnair"
+date: "`r Sys.Date()`"
+output: 
+    BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Exploratory data analysis of unlabelled colon data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{Seurat}
+  %\VignetteDepends{umap}
+  %\VignetteDepends{cowplot}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>"
+)
+```
+
+This vignette reproduces the follow figures from the `psupertime` preprint:
+
+- Fig 1F, Supp Fig 15A, Supp Fig 15B, Supp Fig 15C, Supp Fig 16, Supp Fig 17, Supp Fig 18
+
+# How can we use `psupertime` when we don't have any labels?
+
+This vignette illustrates how to use `psupertime` to analyse unlabelled data. `psupertime` is based on identifying genes which recapitulate the ordering of known sequential labels. How can we use it when we don't have any labels, for example in a single snapshot experiment? By making our own labels!
+
+To do this, we cluster the data, and look at how the clusters are distributed over a dimensionality reduction embedding (like `UMAP` or `t-SNE`). We can then select a sequence of clusters that looks interesting, and use that sequence as input to `psupertime`. In this vignette, we illustrate this approach using unlabelled human colon cells (from [here][1], GSE102698).
+
+[1]: https://www.cell.com/cell-systems/fulltext/S2405-4712(17)30449-0
+
+# Package requirements for vignette
+
+This vignette requires a couple of packages to be installed to run:
+
+- `Seurat` for unsupervised clustering;
+- `umap` for dimensionality reduction; and
+- `cowplot` for some nice plots
+
+First, we'll load the packages we need.
+```{r warnings=FALSE}
+  suppressPackageStartupMessages({
+    library('psupertime')
+    library('psupplementary')
+    library('umap')
+    library('Seurat')
+    library('cowplot')
+    })
+```
+
+
+# Dimensionality reduction and clustering
+
+We load up the data, contained in *colon_sce*, and find the highly variable genes in it.
+
+```{r}
+  # get data
+  data(colon_sce)
+  colon_sce
+
+  # calculate HVGs
+  message('calculating highly variable genes')
+  hvg_params    = list(hvg_cutoff=0.5, bio_cutoff=0, span=0.01)
+  sel_genes     = psupertime:::calc_hvg_genes(colon_sce, hvg_params)
+  sce_hvg     = colon_sce[sel_genes, ]
+  sce_hvg
+```
+
+We then do dimensionality reduction on this restricted data, and store the embedding in a `data.table`.
+
+```{r}
+  # do umap, get layout from it
+  message('doing UMAP projection')
+  set.seed(1)
+  umap_obj    = umap(t(SummarizedExperiment::assay(sce_hvg, 'logcounts')))
+  layout_dt   = data.table(umap_obj$layout)
+  setnames(layout_dt, names(layout_dt), c('UMAP1', 'UMAP2'))
+```
+
+We also do clustering of the data, using `Seurat`'s default settings.
+
+```{r}
+  # do clustering with Seurat
+  message('unsupervised clustering with Seurat')
+  seurat_obj  = Seurat::CreateSeuratObject(
+    SummarizedExperiment::assay(sce_hvg, 'counts'), project="temp", 
+    min.cells=0, min.genes=0
+    )
+  seurat_obj@scale.data   = SummarizedExperiment::assay(sce_hvg, 'logcounts')
+
+  # do PCA and clustering
+  seurat_obj  = Seurat::RunPCA(object=seurat_obj, pc.genes=rownames(sce_hvg), pcs.compute=20, do.print=FALSE)
+  seurat_obj  = Seurat::FindClusters(
+    object=seurat_obj, 
+    reduction.type="pca", dims.use=1:6, 
+    resolution=0.6, print.output=0, save.SNN=TRUE
+    )
+  clusters  = seurat_obj@ident
+```
+
+Let's look at the embedding, and how the clusters are laid out over the embedding. (The first bit of code below does a bit of relabelling of the clusters, just a cosmetic thing so that they are numbered from left to right across the plot.)
+
+```{r}
+  # add clusters, put in sensible order
+  layout_dt[, raw_cluster := clusters ]
+  cluster_order   = data.table(
+    raw_cluster = factor(as.character(c(0, 1, 2, 3, 4, 5, 6, 7, 8))),
+    cluster   = factor(as.character(as.integer(c(8, 4, 3, 6, 9, 1, 2, 5, 7))))
+    )
+  # cluster_order   = layout_dt[, list(cluster_med = median(UMAP1)), by=raw_cluster]
+  # cluster_order[, cluster := factor(as.character(rank(cluster_med))) ]
+  layout_dt     = cluster_order[layout_dt, on='raw_cluster']
+
+  # plot unlabelled
+  message('plotting clusterings')
+  g_plain = ggplot(layout_dt) +
+    aes( x=UMAP1, y=UMAP2) +
+    geom_point(size=3, fill='grey', colour='black', shape=21 ) +
+    theme_light() +
+    theme(
+      axis.text   = element_blank()
+      )
+  # plot unsupervised clusters
+  g_clusters = ggplot(layout_dt) +
+    aes( x=UMAP1, y=UMAP2, colour=cluster) +
+    geom_point() +
+    scale_colour_brewer( palette='Set1' ) +
+    theme_light() +
+    theme(
+      axis.text   = element_blank()
+      )
+```
+
+Here's the layout without the cluster labelling (_Supp Fig 15A_):
+```{r, fig.wide=TRUE, fig.height=4, fig.width=5, fig.cap="UMAP dimensionality reduction"}
+  (g_plain)
+```
+
+and here it is with cluster labelling (_Supp Fig 15B_):
+```{r, fig.wide=TRUE, fig.height=4, fig.width=5, fig.cap="UMAP dimensionality reduction with clusters"}
+  (g_clusters)
+```
+
+# Analysing user-selected cluster sequences with `psupertime`
+
+It looks like cluster orderings starting from cluster `1` could be interesting. Let's define two orderings starting from there, one going up and right, and another going first down then right. If you're doing your own analysis, you'll need to define these yourself.
+```{r}
+  # define things we want to do
+  order_list    = list(
+    c('1', '4', '6', '8'),
+    c('1', '2', '3', '5', '9')
+    )
+```
+
+This next chunk of code cycles through all the cluster sequences we've specified (here, just 2), and does a couple of things for each sequence:
+
+- restricts the dataset to just the clusters for this sequence
+- runs `psupertime` on this restricted sequence
+- plots the genes identified by `psupertime`
+- plots the cluster sequence over the `umap` embedding we made before
+- does GO analysis for this data and plots the results
+
+We'll first run the analysis, then go through the plots one by one (running this section might take a little while).
+```{r}
+  palette         = 'BrBG'
+  label_name      = 'Selected\nSeurat\nclusters'
+  profiles_plots  = list()
+  clusters_plots  = list()
+  go_plot_list    = list()
+  base_size       = 12
+
+  # do psupertime on different cluster sequences
+  message('analysing selected cluster orderings')
+  for ( ii in seq(length(order_list)) ) {
+    # get ordering
+    this_order  = order_list[[ii]]
+
+    # define label
+    tag         = paste0(this_order, collapse='')
+    message('analysing sequence ', tag)
+  
+    # do psupertime
+    y_test_all    = factor(layout_dt$cluster, levels=this_order)
+    keep_idx    = !is.na(y_test_all)
+    sce_test    = sce_hvg[, keep_idx]
+    y_test      = y_test_all[ keep_idx ]
+  
+    # do psupertime
+    message('running psupertime on this sequence')
+    psuper_obj    = psupertime(sce_test, y_test, sel_genes='all')
+
+    # plot selected cluster ordering
+    message('plotting selected sequence over UMAP')
+    g         = plot_selected_cluster_ordering(layout_dt, this_order)
+    clusters_plots[[ii]] = g
+
+    # plot genes identified
+    message('plotting genes over identified psupertime')
+    g         = plot_identified_genes_over_psupertime(psuper_obj, label_name='Ordered\nSeurat\nclusters', palette=palette, n_to_plot=20)
+    profiles_plots[[ii]] = g
+
+    # do go stuff
+    message('GO enrichment analysis of gene clusters')
+    go_list     = psupertime_go_analysis(psuper_obj, org_mapping='org.Mm.eg.db')
+      
+    # assemble supplementary plots
+    message('plotting enrichment results')
+    go_plot_list[[2*(ii-1) + 1]]  = plot_profiles_of_gene_clusters(go_list, label_name=label_name, palette=palette)
+    go_plot_list[[2*(ii-1) + 2]]  = plot_go_results(go_list) + theme( axis.text=element_text(size=6))
+  }
+```
+
+First let's check that the orderings we selected are correct (_Supp Fig 15C_).
+```{r, fig.wide=TRUE, fig.height=4, fig.width=5, fig.cap="Selected cluster sequence 1"}
+  (clusters_plots[[1]])
+```
+```{r, fig.wide=TRUE, fig.height=4, fig.width=5, fig.cap="Selected cluster sequence 2"}
+  (clusters_plots[[2]])
+```
+
+We can then look at the genes which were identified by each run of `psupertime`:
+```{r, fig.wide=TRUE, fig.height=6, fig.width=9, fig.cap="Genes identified for cluster sequence 1 (_Supp Fig 17_)"}
+  (profiles_plots[[1]])
+```
+```{r, fig.wide=TRUE, fig.height=6, fig.width=9, fig.cap="Genes identified for cluster sequence 2 (_Supp Fig 18_)"}
+  (profiles_plots[[2]])
+```
+
+And finally we look at the GO terms identified for the cluster sequences:
+```{r, fig.wide=TRUE, fig.height=12, fig.width=8, fig.cap="Profiles of gene clusters and enriched GO terms (_Supp Fig 16_)"}
+  # plot supplementary
+  message('larger plot of enrichment results')
+  g       = plot_grid(plotlist=go_plot_list, labels=LETTERS[1:4], ncol=2, align='h', axis='b')
+  (g)
+```

@@ -20,6 +20,7 @@ Imports: data.table,
     grDevices,
     scales
 Suggests: 
+    BiocStyle,
     cowplot,
     fastcluster,
     knitr,
