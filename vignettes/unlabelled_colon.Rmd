@@ -45,10 +45,11 @@ First, we'll load the packages we need.
   suppressPackageStartupMessages({
     library('psupertime')
     library('psupplementary')
-    library('data.table')
-    library('umap')
-    library('Seurat')
     library('cowplot')
+    library('data.table')
+    library('Seurat')
+    library('topGO')
+    library('umap')
     })
 ```
 
@@ -193,7 +194,7 @@ We'll first run the analysis, then go through the plots one by one (running this
 
     # plot selected cluster ordering
     message('plotting selected sequence over UMAP')
-    g         = plot_selected_cluster_ordering(layout_dt, this_order)
+    g         = psupplementary:::plot_selected_cluster_ordering(layout_dt, this_order)
     clusters_plots[[ii]] = g
 
     # plot genes identified
