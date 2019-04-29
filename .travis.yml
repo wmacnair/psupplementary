@@ -7,3 +7,4 @@ bioc_packages:
   - SingleCellExperiment
   - SummarizedExperiment
   - topGO
+r_github_packages: wmacnair/psupertime
