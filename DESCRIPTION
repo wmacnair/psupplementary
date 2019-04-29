@@ -2,31 +2,31 @@ Package: psupplementary
 Title: Data used in paper describing psupertime method
 Version: 0.1.0
 Authors@R: person("Will", "Macnair", email = "willmacnair@gmail.com", role = c("aut", "cre"))
-Description: psupertime is a method for identifying genes co-varying in single cell RNA-seq data which has known sequential labels (e.g. a time series experiment). This package contains the data required to replicate the analyses in the psupertime paper (kept separate so that the main package is light). This package can be used either to play around with psupertime, or to replicate the results in the paper.
+Description: psupertime is a method for identifying genes co-varying in single cell RNA-seq data which has known sequential labels (e.g. a time series experiment). This package contains the data required to replicate the analyses in the psupertime paper (kept separate so that the main package is light). This package can be used either to explore the capabilities of psupertime, or to replicate the results in the paper.
 Depends: R (>= 3.4.3)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Imports: data.table,
-    gmodels,
+Imports: cowplot,
+    data.table,
+    fastcluster,
     ggplot2,
     glmnet,
+    gmodels,
+    grDevices,
     psupertime,
     RColorBrewer,
-    SummarizedExperiment,
-    SingleCellExperiment,
+    scales,
     scran,
-    stringr,
-    grDevices,
-    scales
-Suggests: 
-    BiocStyle,
-    cowplot,
-    fastcluster,
-    knitr,
-    rmarkdown,
     Seurat,
+    SingleCellExperiment,
+    stringr,
+    SummarizedExperiment,
     topGO,
     umap
+Suggests: 
+    BiocStyle,
+    knitr,
+    rmarkdown
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
