@@ -74,8 +74,8 @@ Now we check how the labels are distributed over the data using a non-linear dim
   x               = t(SummarizedExperiment::assay(acinar_hvg, 'logcounts'))
   wellKey_vector  = SingleCellExperiment::colData(acinar_hvg)$wellKey
   label_vector    = factor(SingleCellExperiment::colData(acinar_hvg)[['donor_age']])
-  proj_umap       = calc_umap(x, wellKey_vector)
-  g               = plot_dim_reduction(label_vector, proj_umap$umap1, proj_umap$umap2, 
+  proj_umap       = psupplementary:::calc_umap(x, wellKey_vector)
+  g               = psupplementary:::plot_dim_reduction(label_vector, proj_umap$umap1, proj_umap$umap2, 
     labels=c('umap1', 'umap2', 'Donor age (years)'))
   (g)
 ```
