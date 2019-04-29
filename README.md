@@ -21,7 +21,7 @@ git clone https://github.com/wmacnair/psupplementary.git
 ```
 then you have two options.
 
-*Fast option (~2 minutes):* run this line in R to install it without building the vignettes:
+*Fast option (~7 minutes):* run this line in R to install it without building the vignettes:
 ```R
 devtools::install('path/to/packages/psupplementary')
 ```

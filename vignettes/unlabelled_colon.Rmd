@@ -45,6 +45,7 @@ First, we'll load the packages we need.
   suppressPackageStartupMessages({
     library('psupertime')
     library('psupplementary')
+    library('data.table')
     library('umap')
     library('Seurat')
     library('cowplot')
@@ -110,8 +111,6 @@ Let's look at the embedding, and how the clusters are laid out over the embeddin
     raw_cluster = factor(as.character(c(0, 1, 2, 3, 4, 5, 6, 7, 8))),
     cluster   = factor(as.character(as.integer(c(8, 4, 3, 6, 9, 1, 2, 5, 7))))
     )
-  # cluster_order   = layout_dt[, list(cluster_med = median(UMAP1)), by=raw_cluster]
-  # cluster_order[, cluster := factor(as.character(rank(cluster_med))) ]
   layout_dt     = cluster_order[layout_dt, on='raw_cluster']
 
   # plot unlabelled
