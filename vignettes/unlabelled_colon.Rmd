@@ -48,6 +48,7 @@ First, we'll load the packages we need.
     library('cowplot')
     library('data.table')
     library('Seurat')
+    library('SingleCellExperiment')
     library('topGO')
     library('umap')
     })
@@ -191,6 +192,7 @@ We'll first run the analysis, then go through the plots one by one (running this
     # do psupertime
     message('running psupertime on this sequence')
     psuper_obj    = psupertime(sce_test, y_test, sel_genes='all')
+    print(psuper_obj)
 
     # plot selected cluster ordering
     message('plotting selected sequence over UMAP')

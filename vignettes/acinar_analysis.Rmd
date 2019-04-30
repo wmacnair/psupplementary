@@ -35,6 +35,7 @@ There are a couple of bits of additional analysis for which you need additional 
   suppressPackageStartupMessages({
     library('psupertime')
     library('psupplementary')
+    library('SingleCellExperiment')
     })
 ```
 
@@ -91,6 +92,7 @@ We now run `psupertime` using default parameters, and examine the genes that it 
   message('running psupertime')
   y_age       = acinar_sce$donor_age
   psuper_obj  = psupertime(acinar_sce, y_age)
+  psuper_obj
 ```
 
 # Plotting `psupertime` results
