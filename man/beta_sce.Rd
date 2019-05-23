@@ -3,8 +3,8 @@
 \docType{data}
 \name{beta_sce}
 \alias{beta_sce}
-\title{Developing beta cells}
-\format{A SingleCellExperiment object with [genes] by [cells].}
+\title{Developing mouse beta cells}
+\format{A SingleCellExperiment object with 40737 genes by 575 cells.}
 \source{
 \url{https://www.cell.com/cell-metabolism/fulltext/S1550-4131(17)30208-5}
 }

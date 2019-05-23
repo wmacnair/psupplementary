@@ -4,7 +4,7 @@
 \alias{plot_selected_cluster_ordering}
 \title{Plot this clustering nicely}
 \usage{
-plot_selected_cluster_ordering(layout_dt, this_order, tag, output_dir, ext)
+plot_selected_cluster_ordering(layout_dt, this_order)
 }
 \description{
 Plot this clustering nicely

@@ -3,8 +3,8 @@
 \docType{data}
 \name{acinar_sce}
 \alias{acinar_sce}
-\title{Aging acinar cells}
-\format{A SingleCellExperiment object with [genes] by [cells].}
+\title{Aging human acinar cells}
+\format{A SingleCellExperiment object with 23368 genes by 411 cells.}
 \source{
 \url{https://www.sciencedirect.com/science/article/pii/S009286741731053X}
 }

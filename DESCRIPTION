@@ -1,6 +1,6 @@
 Package: psupplementary
 Title: Data used in paper describing psupertime method
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Will", "Macnair", email = "willmacnair@gmail.com", role = c("aut", "cre"))
 Description: psupertime is a method for identifying genes co-varying in single cell RNA-seq data which has known sequential labels (e.g. a time series experiment). This package contains the data required to replicate the analyses in the psupertime paper (kept separate so that the main package is light). This package can be used either to explore the capabilities of psupertime, or to replicate the results in the paper.
 Depends: R (>= 3.4.3)

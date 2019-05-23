@@ -3,11 +3,11 @@
 \name{acinar_cells_plots}
 \alias{acinar_cells_plots}
 \title{Dimensionality reduction plots and standard psupertime results for acinar cells
-(Fig 1C, Fig 1D, Fig 1D, Supp Fig 01, Supp Fig 02, Supp Fig 03)}
+(Fig 1C, Fig 1D, Fig 1E, Supp Fig 01, Supp Fig 02, Supp Fig 03)}
 \usage{
 acinar_cells_plots(output_dir = ".", ext = "png")
 }
 \description{
 Dimensionality reduction plots and standard psupertime results for acinar cells
-(Fig 1C, Fig 1D, Fig 1D, Supp Fig 01, Supp Fig 02, Supp Fig 03)
+(Fig 1C, Fig 1D, Fig 1E, Supp Fig 01, Supp Fig 02, Supp Fig 03)
 }

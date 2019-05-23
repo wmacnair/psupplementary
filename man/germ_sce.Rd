@@ -4,7 +4,7 @@
 \name{germ_sce}
 \alias{germ_sce}
 \title{Developing human female germline cells}
-\format{A SingleCellExperiment object with [genes] by [cells].}
+\format{A SingleCellExperiment object with 24153 genes by 992 cells.}
 \source{
 \url{https://www.cell.com/cell-stem-cell/fulltext/S1934-5909(17)30078-4}
 }

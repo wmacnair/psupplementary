@@ -3,8 +3,8 @@
 \docType{data}
 \name{colon_sce}
 \alias{colon_sce}
-\title{[human?] colon cells}
-\format{A SingleCellExperiment object with [genes] by [cells].}
+\title{Mouse colon cells}
+\format{A SingleCellExperiment object with 25504 genes by 1894 cells.}
 \source{
 \url{https://www.cell.com/cell-systems/fulltext/S2405-4712(17)30449-0}
 }

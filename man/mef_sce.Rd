@@ -3,8 +3,8 @@
 \docType{data}
 \name{mef_sce}
 \alias{mef_sce}
-\title{MEFs reprogrammed to neurons}
-\format{A SingleCellExperiment object with [genes] by [cells].}
+\title{Mouse embryonic fibroblasts reprogrammed to neurons}
+\format{A SingleCellExperiment object with 22524 genes by 315 cells.}
 \source{
 \url{https://www.nature.com/articles/nature18323}
 }

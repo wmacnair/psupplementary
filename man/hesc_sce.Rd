@@ -4,7 +4,7 @@
 \name{hesc_sce}
 \alias{hesc_sce}
 \title{Human embryonic stem cells}
-\format{A SingleCellExperiment object with [genes] by [cells].}
+\format{A SingleCellExperiment object with 26178 genes by 1529 cells.}
 \source{
 \url{https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-3929/}
 }
