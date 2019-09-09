@@ -8,3 +8,4 @@ bioc_packages:
   - SummarizedExperiment
   - topGO
 r_github_packages: wmacnair/psupertime
+install: travis_wait mvn install
